@@ -42,30 +42,36 @@ int main()
     file.open("data.dat");
 
 
-    // for(int i = 0; i <1000000; i+= 1000)
-    // {
-    //     file << i << " " <<approx1D(i,0,M_PI) << " " << 2 << "\n"; 
-    //     cout << "In progress: " << i/10000000.*100 << "%" << "\n";
-    // }
+    cout << "Aproksymacja wielu całek dla różnej ilości próbek:" << endl;  
 
+    for(int i = 0; i <1000000; i+= 1000)
+    {
+        file << i << " " <<approx1D(i,0,M_PI) << " " << 2 << "\n"; 
+        cout << "In progress: " << i/10000000.*100 << "%" << "\n";
+    }
 
+    file << endl;
+
+    file.close();
+
+    cout << "Aproksymacja jednej całki -> pattern" << endl;
  
     double a = 0; double b = M_PI;
-    int N = 10000;
+    int N = 100000;
 
     double S=0;
     for(int i = 1;i<N;i++)
     {
+        
         S += g(a+(b-a)*rand()/(RAND_MAX+1.));
         file << i << " " << S*((b-a)/(double)i) << " " << 2 << endl;
+
     }
 
 
-    file.close();
-    file << endl;
 
     return 0;
 }
 
-// porównanie ze skalowaniem z N z wynikiem dokładnym (log(abs(x-x_n)) = f(log(N)))
-// jak sprawdzic czy punkt lezy w jakims obszarze
+// teraz analiza monte Carlo 1D 
+// calka wielowymiarowa z wariancją i przedziałem ufności
