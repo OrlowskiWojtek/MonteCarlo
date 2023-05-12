@@ -17,12 +17,17 @@ double g(double x)
 
 tuple <double,double> MC1D(int N, double a, double b)
 {
+    double V = 0;
     double S=0;
+    double xi;
     for(int i = 0;i<N;i++)
     {
-        S += g(a+(b-a)*rand()/(RAND_MAX+1.));
+        xi = rand()/(RAND_MAX+1.);  
+        S += g(a+(b-a)*xi);
+        V += pow(g(xi),2);
     }
-    return {(double) S*((b-a)/(double)N),0};
+    double MC = (double) S*((b-a)/(double)N); 
+    return {MC,pow((b-a),2)/(N-1.)*V - N/(N-1.)*MC};
 }
 
 void approx1D(int N, double a, double b, double intVal)
@@ -34,9 +39,14 @@ void approx1D(int N, double a, double b, double intVal)
 
     cout << "Aproksymacja wielu całek dla różnej ilości próbek:" << endl;  
 
-    for(int i = 0; i < N; i+= 1000)
+    double S;
+    double V;
+
+    for(int i = 1000; i < N; i+= 1000)
     {
-        file << i << " " << get<0>(MC1D(i,a,b)) << " " << intVal << "\n"; 
+        S = get<0>(MC1D(i,a,b));
+        V = get<1>(MC1D(i,a,b));
+        file << i << " " << S << " " << intVal << " " << S-2*sqrt(V/i) << " " << S+2*sqrt(V/i) << "\n"; 
         cout << "In progress: " << (double)i/N*100 << "%" << "\n";
     }
 
