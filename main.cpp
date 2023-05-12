@@ -39,15 +39,18 @@ int main()
 
     fstream file;
 
-    file.open("data.dat");
 
+    system("touch data.dat");
+    file.open("data.dat");
 
     cout << "Aproksymacja wielu całek dla różnej ilości próbek:" << endl;  
 
-    for(int i = 0; i <1000000; i+= 1000)
+    int N = 1000000;
+
+    for(int i = 0; i <N; i+= 1000)
     {
         file << i << " " <<approx1D(i,0,M_PI) << " " << 2 << "\n"; 
-        cout << "In progress: " << i/10000000.*100 << "%" << "\n";
+        cout << "In progress: " << (double)i/N*100 << "%" << "\n";
     }
 
     file << endl;
@@ -56,19 +59,23 @@ int main()
 
     cout << "Aproksymacja jednej całki -> pattern" << endl;
  
+    system("touch data2.dat");
+    file.open("data2.dat");
+    
     double a = 0; double b = M_PI;
-    int N = 100000;
-
-    double S=0;
+    N = 100000; double S=0;
+    
     for(int i = 1;i<N;i++)
     {
-        
         S += g(a+(b-a)*rand()/(RAND_MAX+1.));
         file << i << " " << S*((b-a)/(double)i) << " " << 2 << endl;
-
+        cout << "In progress: " << (double)i/N*100 << "%" << "\n";
     }
 
+    file.close();
 
+    system("gnuplot < script.gnu");
+    system("rm data.dat && rm data2.dat");
 
     return 0;
 }
