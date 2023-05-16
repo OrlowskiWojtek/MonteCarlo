@@ -9,3 +9,7 @@ plot "data.dat" using 1:4:5 with filledcurve fc rgb Shadecolor title "Zakres nie
 set output "MCOneSample.png"
 
 plot "data2.dat" using 1:2 w l lw 2 lt rgb "#312512" notitle, "" using 1:3 w l title "wynik dokładny"
+
+set output "MCManySample2D.png"
+
+plot "data3.dat" using 1:4:5 with filledcurve fc rgb Shadecolor title "Zakres niepewności" ,"" using 1:2 w l lw 2 lt rgb "#312512" notitle, "" using 1:3 w l title "wynik dokładny"

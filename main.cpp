@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <tuple>
+#include <cstring>
 
 using namespace std;
 
@@ -41,8 +42,8 @@ void approx1D(int N, double a, double b, double intVal)
 {
     fstream file;
 
-    system("touch data.dat");
-    file.open("data.dat");
+    system("touch data1.dat");
+    file.open("data1.dat");
 
     cout << "Aproksymacja wielu całek dla różnej ilości próbek:" << endl;  
 
@@ -98,31 +99,66 @@ tuple <double,double> MC2D(int N, double a[2], double b[2])
         V += pow(f(xi1,xi2),2);
     }
     double MC = S*((b[1]-b[0])*(a[1]-a[0])/(double)N);
-    return {MC,0}; 
+    return {MC,pow((b[1]- b[0])*(a[1]-a[0]),2)/(N-1.)*V - N/(N-1.)*MC}; 
+}
+
+void approx2D(int N, double intVal)
+{
+    fstream file;
+
+    system("touch data3.dat");
+    file.open("data3.dat");
+
+    cout << "Aproksymacja wielu całek dla różnej ilości próbek:" << endl;  
+
+    double S;
+    double V;
+
+    double a[] = {0,1};
+    double b[] = {0,1};
+
+    for(int i = 1000; i < N; i+= 1000)
+    {
+        S = get<0>(MC2D(i,a,b));
+        V = get<1>(MC2D(i,a,b));
+        file << i << " " << S << " " << intVal << " " << S-2*sqrt(V/i) << " " << S+2*sqrt(V/i) << "\n"; 
+        cout << "In progress: " << (double)i/N*100 << "%" << "\n";
+    }
+
+    file << endl;
+
+    file.close();
 }
 
 int main()
 {
     srand(time(NULL));
 
-    //approx1D(1e6,0,M_PI,2);
-    //app1sam(1e4,0,M_PI,2);
+    approx1D(1e6,0,M_PI,2);
+    app1sam(1e4,0,M_PI,2);
     
-    //system("gnuplot < script.gnu");
+    approx2D(1e6,pow(1-exp(1),2));
 
-    double a[] = {0,1};
-    double b[] = {0,1}; 
-
-    cout << get<0>(MC2D(1000000,a,b)) << endl;
-    
+    system("gnuplot < script.gnu");
 
     ifstream ifile;
-    ifile.open("data.dat");
 
-    if(ifile)
+    string filename = "data";
+
+    for(int i = 1; i<=3; i++)
     {
-        ifile.close();
-        system("rm data.dat && rm data2.dat");
+        ifile.open("data"+to_string(i)+".dat");
+
+        if(ifile)
+        {
+            ifile.close();
+            string command ="rm data"+to_string(i)+".dat"; 
+            char *cstr = new char[command.length() + 1];
+            strcpy(cstr, command.c_str());
+            system(cstr);
+            delete[] cstr;
+            cout << "deleted: data"+to_string(i)+".dat" << endl;  
+        }
     }
 
     return 0;
