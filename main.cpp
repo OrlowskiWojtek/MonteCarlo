@@ -6,149 +6,75 @@
 #include <string>
 #include <tuple>
 #include <cstring>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
 // aproksymacja całki gausowskiej od 0 do 1
 
-// zamienić dla ogólnej funkcji N wymiarowej
-
-double g(double x)
+double g(vector<double> x)
 {
-    return sin(x);
+    double arg = 0;
+    // funkcja k argumentów x
+   
+    for(auto &i : x)
+    {
+        arg += i;
+    }
+    return sin(arg);
 }
 
-double f(double x1, double x2)
+tuple <double,double> MCND(int N, vector <double> a, vector <double> b)
 {
-    return exp(x1+x2);
-}
-
-tuple <double,double> MC1D(int N, double a, double b)
-{
+    // a i b to punkty początku oraz końca dla pewnego jednego wymiaru
     double V = 0;
     double S=0;
-    double xi;
+    vector <double> temp(b.size()); 
+    vector <double> xiVec(b.size());
     for(int i = 0;i<N;i++)
-    {
-        xi = rand()/(RAND_MAX+1.);  
-        S += g(a+(b-a)*xi);
-        V += pow(g(xi),2);
+    {   
+        for(unsigned int j = 0; j < temp.size(); j++)
+        {
+            xiVec[j] = rand()/(RAND_MAX+1.);
+            temp[j] = a[j] + (b[j] - a[j])*xiVec[j];
+        }
+        S += g(temp);
+        V += pow(g(xiVec),2);
     }
-    double MC = (double) S*((b-a)/(double)N); 
-    return {MC,pow((b-a),2)/(N-1.)*V - N/(N-1.)*MC};
-}
-
-void approx1D(int N, double a, double b, double intVal)
-{
-    fstream file;
-
-    system("touch data1.dat");
-    file.open("data1.dat");
-
-    cout << "Aproksymacja wielu całek dla różnej ilości próbek:" << endl;  
-
-    double S;
-    double V;
-
-    for(int i = 1000; i < N; i+= 1000)
-    {
-        S = get<0>(MC1D(i,a,b));
-        V = get<1>(MC1D(i,a,b));
-        file << i << " " << S << " " << intVal << " " << S-2*sqrt(V/i) << " " << S+2*sqrt(V/i) << "\n"; 
-        cout << "In progress: " << (double)i/N*100 << "%" << "\n";
-    }
-
-    file << endl;
-
-    file.close();
-
-}
-
-void app1sam(int N, double a, double b, double intVal)
-{
-    fstream file;
-
-    cout << "Aproksymacja jednej całki -> pattern" << endl;
- 
-    system("touch data2.dat");
-    file.open("data2.dat");
     
-    double S=0;
-    
-    for(int i = 1;i<N;i++)
+    double MC = S;
+    double vVal = V/(N-1.);
+    for(auto i = temp.begin(); i != temp.end(); i++)
     {
-        S += g(a+(b-a)*rand()/(RAND_MAX+1.));
-        file << i << " " << S*((b-a)/(double)i) << " " << intVal << endl;
-        cout << "In progress: " << (double)i/N*100 << "%" << "\n";
+        MC *= (b[*i]-a[*i]); 
+        vVal *= pow(b[*i] - a[*i],2);
     }
 
-    file.close();
-}
 
-tuple <double,double> MC2D(int N, double a[2], double b[2])
-{
-    double V = 0; 
-    double S = 0;
-    double xi1;
-    double xi2;
-    for(int i = 0; i < N; i++)
-    {
-        xi1 = rand()/(RAND_MAX + 1.);
-        xi2 = rand()/(RAND_MAX + 1.);
-        S += f(b[1]+(b[0]-b[1])*xi1,a[1]+(a[0]-a[1])*xi2);
-        V += pow(f(xi1,xi2),2);
-    }
-    double MC = S*((b[1]-b[0])*(a[1]-a[0])/(double)N);
-    return {MC,pow((b[1]- b[0])*(a[1]-a[0]),2)/(N-1.)*V - N/(N-1.)*MC}; 
-}
-
-void approx2D(int N, double intVal)
-{
-    fstream file;
-
-    system("touch data3.dat");
-    file.open("data3.dat");
-
-    cout << "Aproksymacja wielu całek dla różnej ilości próbek:" << endl;  
-
-    double S;
-    double V;
-
-    double a[] = {0,1};
-    double b[] = {0,1};
-
-    for(int i = 1000; i < N; i+= 1000)
-    {
-        S = get<0>(MC2D(i,a,b));
-        V = get<1>(MC2D(i,a,b));
-        file << i << " " << S << " " << intVal << " " << S-2*sqrt(V/i) << " " << S+2*sqrt(V/i) << "\n"; 
-        cout << "In progress: " << (double)i/N*100 << "%" << "\n";
-    }
-
-    file << endl;
-
-    file.close();
+    return {MC/N,vVal - N/(N-1.)*MC};
 }
 
 int main()
 {
     srand(time(NULL));
 
-    approx1D(1e6,0,M_PI,2);
-    app1sam(1e4,0,M_PI,2);
-    
-    approx2D(1e6,pow(1-exp(1),2));
+    // niech to będzie funkcja 5 zmiennych od 0 do 1
 
-    system("gnuplot < script.gnu");
+    vector <double> a = {0,0,0};
+    vector <double> b = {1,1,1};
+
+    tuple <double,double> MCval = MCND(1e6,a,b);
+
+    cout << get<0>(MCval) << " " << get<1>(MCval)<< endl;
+
 
     ifstream ifile;
-
     string filename = "data";
 
     for(int i = 1; i<=3; i++)
     {
         ifile.open("data"+to_string(i)+".dat");
-
         if(ifile)
         {
             ifile.close();
