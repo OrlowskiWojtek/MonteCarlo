@@ -45,12 +45,11 @@ tuple <double,double> MCND(int N, vector <double> a, vector <double> b)
     
     double MC = S;
     double vVal = V/(N-1.);
-    for(auto i = temp.begin(); i != temp.end(); i++)
+    for(unsigned int i = 0; i < temp.size(); i++)
     {
-        MC *= (b[*i]-a[*i]); 
-        vVal *= pow(b[*i] - a[*i],2);
+        MC *= (b[i]-a[i]); 
+        vVal *= pow(b[i] - a[i],2);
     }
-
 
     return {MC/N,vVal - N/(N-1.)*MC};
 }
