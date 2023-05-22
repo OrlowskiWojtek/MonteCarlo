@@ -15,24 +15,15 @@ using namespace std;
 
 double g(vector<double> x)
 {
-    double arg = 0;
-    // funkcja k argumentów x
-   
-    for(auto &i : x)
-    {
-        arg += i;
-    }
-    return sin(arg);
+    return (x[0]+3)*(x[1]+1)*(x[2]+2);
 }
 
-tuple <double,double> MCND(int N, vector <double> a, vector <double> b, double (*func)(vector <double>))
+tuple <double,double> MCND(int N,vector <double> temp, vector <double> a, vector <double> b, double (*func)(vector <double>))
 {
     // a i b to punkty początku oraz końca dla pewnego jednego wymiaru
     double V = 0;
     double S=0;
     double mult;
-    vector <double> temp(b.size()); 
-    vector <double> xiVec(b.size());
     for(int i = 0;i<N;i++)
     {   
         for(unsigned int j = 0; j < temp.size(); j++)
@@ -40,7 +31,7 @@ tuple <double,double> MCND(int N, vector <double> a, vector <double> b, double (
             temp[j] = a[j] + (b[j] - a[j])*rand()/(RAND_MAX+1.);
         }
         S += func(temp);
-        mult = 1;
+        mult = 1.;
         for(unsigned int j = 0; j < temp.size(); j++)
         {
             mult *= b[j] - a[j];
@@ -53,7 +44,25 @@ tuple <double,double> MCND(int N, vector <double> a, vector <double> b, double (
         S *= (b[i]-a[i]); 
     }
 
-    return {S/N,(V)/(N-1.) - pow(S,2)/(N*(N-1.))};
+    return {S/N,V/(N-1.) - pow(S/N,2)*N/(N-1.)};
+}
+
+void approxMD(int N, vector <double> a, vector <double> b, tuple <double,double> (*MC)(int, vector <double>, vector <double>, vector<double>, double (*)(vector<double>)))
+{
+    ofstream file;
+    file.open("data.dat");
+    tuple <double,double> MCval;
+    vector <double> temp(b.size()); 
+    for(int i = 1000; i<= N; i+= 1000)
+    {
+        MCval = MC(i,temp,a,b,&g);
+        file  << i <<" "<< get<0>(MCval) << " " << get<0>(MCval) - 2*sqrt(get<1>(MCval)/N) 
+        << " " << get<0>(MCval) + 2*sqrt(get<1>(MCval)/N) << endl;
+        cout << "In progress: " << i/(double)N*100 << "%" << endl;
+    }
+
+    file.close();
+
 }
 
 int main()
@@ -63,12 +72,15 @@ int main()
     // niech to będzie funkcja 5 zmiennych od 0 do 1
 
     vector <double> a = {0,0,0};
-    vector <double> b = {1,1,1};
+    vector <double> b = {3,2,1};
+    vector <double> temp(b.size());
 
-    tuple <double,double> MCval = MCND(1e6,a,b,&g);
 
-    cout << get<0>(MCval) << " " << get<1>(MCval)<< endl;
+    // approxMD(1e6,a,b,&MCND);
 
+    cout << get<0>(MCND(1e6,temp,a,b,&g))<< endl;
+
+    /*
 
     ifstream ifile;
     string filename = "data";
@@ -87,6 +99,8 @@ int main()
             cout << "deleted: data"+to_string(i)+".dat" << endl;  
         }
     }
+    
+    */
 
     return 0;
 }
