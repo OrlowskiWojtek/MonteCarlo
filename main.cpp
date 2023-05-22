@@ -25,33 +25,35 @@ double g(vector<double> x)
     return sin(arg);
 }
 
-tuple <double,double> MCND(int N, vector <double> a, vector <double> b)
+tuple <double,double> MCND(int N, vector <double> a, vector <double> b, double (*func)(vector <double>))
 {
     // a i b to punkty początku oraz końca dla pewnego jednego wymiaru
     double V = 0;
     double S=0;
+    double mult;
     vector <double> temp(b.size()); 
     vector <double> xiVec(b.size());
     for(int i = 0;i<N;i++)
     {   
         for(unsigned int j = 0; j < temp.size(); j++)
         {
-            xiVec[j] = rand()/(RAND_MAX+1.);
-            temp[j] = a[j] + (b[j] - a[j])*xiVec[j];
+            temp[j] = a[j] + (b[j] - a[j])*rand()/(RAND_MAX+1.);
         }
-        S += g(temp);
-        V += pow(g(xiVec),2);
-    }
-    
-    double MC = S;
-    double vVal = V/(N-1.);
-    for(unsigned int i = 0; i < temp.size(); i++)
-    {
-        MC *= (b[i]-a[i]); 
-        vVal *= pow(b[i] - a[i],2);
+        S += func(temp);
+        mult = 1;
+        for(unsigned int j = 0; j < temp.size(); j++)
+        {
+            mult *= b[j] - a[j];
+        }
+        V += pow(mult*func(temp),2);
     }
 
-    return {MC/N,vVal - N/(N-1.)*MC};
+    for(unsigned int i = 0; i < temp.size(); i++)
+    {
+        S *= (b[i]-a[i]); 
+    }
+
+    return {S/N,(V)/(N-1.) - pow(S,2)/(N*(N-1.))};
 }
 
 int main()
@@ -63,7 +65,7 @@ int main()
     vector <double> a = {0,0,0};
     vector <double> b = {1,1,1};
 
-    tuple <double,double> MCval = MCND(1e6,a,b);
+    tuple <double,double> MCval = MCND(1e6,a,b,&g);
 
     cout << get<0>(MCval) << " " << get<1>(MCval)<< endl;
 
