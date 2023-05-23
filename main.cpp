@@ -1,21 +1,16 @@
 #include <iostream>
 #include <cmath>
-#include <ctime>
 #include <cstdlib>
 #include <fstream>
-#include <string>
 #include <tuple>
-#include <cstring>
 #include <vector>
-#include <algorithm>
 
 using namespace std;
 
-// aproksymacja całki gausowskiej od 0 do 1
 
 double g(vector<double> x)
 {
-    return (x[0]+3)*(x[1]+1)*(x[2]+2);
+    return exp(x[0]);
 }
 
 tuple <double,double> MCND(int N,vector <double> temp, vector <double> a, vector <double> b, double (*func)(vector <double>))
@@ -65,45 +60,26 @@ void approxMD(int N, vector <double> a, vector <double> b, tuple <double,double>
 
 }
 
+void getData(int N)
+{
+    vector <double> a = {4};
+    vector <double> b = {5};
+    vector <double> temp(b.size());
+    tuple<double,double> MC = MCND(N,temp,a,b,&g);
+    cout << "Ilość losowań: " << N <<" | Wartość całki: "<< get<0>(MC) << " | błąd dolny:  " << get<0>(MC) - 2*sqrt(get<1>(MC)/N) 
+        << " | błąd górny: " << get<0>(MC) + 2*sqrt(get<1>(MC)/N) << endl;
+}
+
 int main()
 {
     srand(time(NULL));
 
-    // niech to będzie funkcja 5 zmiennych od 0 do 1
-
-    vector <double> a = {0,0,0};
-    vector <double> b = {3,2,1};
-    vector <double> temp(b.size());
-
-
     // approxMD(1e6,a,b,&MCND);
 
-    cout << get<0>(MCND(1e6,temp,a,b,&g))<< endl;
-
-    /*
-
-    ifstream ifile;
-    string filename = "data";
-
-    for(int i = 1; i<=3; i++)
-    {
-        ifile.open("data"+to_string(i)+".dat");
-        if(ifile)
-        {
-            ifile.close();
-            string command ="rm data"+to_string(i)+".dat"; 
-            char *cstr = new char[command.length() + 1];
-            strcpy(cstr, command.c_str());
-            system(cstr);
-            delete[] cstr;
-            cout << "deleted: data"+to_string(i)+".dat" << endl;  
-        }
-    }
-    
-    */
+    getData(1e6);
+   
 
     return 0;
 }
 
-// teraz analiza monte Carlo 1D 
 // calka wielowymiarowa z wariancją i przedziałem ufności
