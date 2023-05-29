@@ -4,7 +4,7 @@ set output "MCMultiDimensional.png"
 set xlabel "Ilosc losowan"
 set ylabel "wartosc całki"
 Shadecolor = "#80E0A080"
-plot "data.dat" using 1:3:4 with filledcurve fc rgb Shadecolor title "Zakres niepewności" ,"data.dat" using 1:2 w l lw 2 lt rgb "#312512" notitle#, "" using 1:(0) w l title "wynik dokładny"
+plot "data.dat" using 1:3:4 with filledcurve fc rgb Shadecolor title "Przedział ufności" ,"data.dat" using 1:2 w l lw 2 lt rgb "#312512" notitle#, "" using 1:(0) w l title "wynik dokładny"
 
 #set output "MCOneSample.png"
 

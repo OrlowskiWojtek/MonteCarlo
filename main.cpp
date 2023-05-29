@@ -7,10 +7,14 @@
 
 using namespace std;
 
-
 double g(vector<double> x)
 {
-    return exp(x[0]);
+    double arg = 0;
+    for(auto &i : x)
+    {
+        arg += i;
+    }
+    return exp(arg);
 }
 
 tuple <double,double> MCND(int N,vector <double> temp, vector <double> a, vector <double> b, double (*func)(vector <double>))
@@ -62,8 +66,8 @@ void approxMD(int N, vector <double> a, vector <double> b, tuple <double,double>
 
 void getData(int N)
 {
-    vector <double> a = {4};
-    vector <double> b = {5};
+    vector <double> a = {0,0,0};
+    vector <double> b = {1,2,3};
     vector <double> temp(b.size());
     tuple<double,double> MC = MCND(N,temp,a,b,&g);
     cout << "Ilość losowań: " << N <<" | Wartość całki: "<< get<0>(MC) << " | błąd dolny:  " << get<0>(MC) - 2*sqrt(get<1>(MC)/N) 
@@ -74,9 +78,12 @@ int main()
 {
     srand(time(NULL));
 
-    // approxMD(1e6,a,b,&MCND);
+    vector <double> a = {0,0,0};
+    vector <double> b = {1,2,3};
 
-    getData(1e6);
+    //approxMD(1e6,a,b,&MCND);
+
+    getData(1e7);
    
 
     return 0;
